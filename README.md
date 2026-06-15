@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # my_portfolio
 
 A new Flutter project.
@@ -92,3 +93,7 @@ flutter run -d linux
   the sticky nav bar's frosted glass effect.
 - All other state is local widget state (`StatefulWidget` / `setState`).
   This keeps things simple for a portfolio that has no backend.
+=======
+# saad00
+A modern, responsive portfolio showcasing my projects and skills in Flutter and core computer science concepts.
+>>>>>>> db90c241e5523a9334b60015173afbadacc23511
