@@ -17,7 +17,7 @@ class ExperienceSection extends StatelessWidget {
     final isWide = MediaQuery.of(context).size.width > 800;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 250, vertical: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -28,9 +28,10 @@ class ExperienceSection extends StatelessWidget {
           isWide
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween ,
                   children: [
-                    SizedBox(width: 280, child: _SectionHeader(isDark: isDark)),
-                    const SizedBox(width: 80),
+                    SizedBox(width: 300, child: _SectionHeader(isDark: isDark)),  
+                    const SizedBox(width: 50),
                     Expanded(child: _Timeline(isDark: isDark)),
                   ],
                 )
@@ -59,7 +60,7 @@ class _SectionHeader extends StatelessWidget {
               fontFamily: 'JetBrainsMono',
               fontSize: 10,
               fontWeight: FontWeight.w400,
-              letterSpacing: 2,
+              letterSpacing: 2, 
               color: AppColors.flCyan,
             )),
         const SizedBox(height: 12),
@@ -67,8 +68,8 @@ class _SectionHeader extends StatelessWidget {
           "Where I've\nGrown.",
           style: TextStyle(
             fontFamily: 'Syne',
-            fontSize: Responsive.scale(context, 40, 64),
-            fontWeight: FontWeight.w800,
+            fontSize: Responsive.scale(context, 40, 50),
+            fontWeight: FontWeight.w800,      
             letterSpacing: -2,
             height: 1.05,
             color: textColor,
@@ -80,7 +81,7 @@ class _SectionHeader extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'Syne',
             fontSize: 16,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w400,  
             color: subColor,
             height: 1.7,
           ),
