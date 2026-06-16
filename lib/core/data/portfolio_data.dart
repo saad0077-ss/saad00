@@ -16,12 +16,12 @@ class PortfolioData {
   static const String tagline = 'Flutter Developer';
 
   static const String heroBio =
-      'I craft pixel-perfect, performance-obsessed Flutter apps — '
-      '\nfrom silky native mobile experiences to full cross-platform '
-      '\nproducts that feel at home on every screen.';
+      'Fresher Flutter developer building a strong foundation in cross-platform mobile '
+      'development. Passionate about crafting clean UI and learning every layer of the '
+      'Flutter ecosystem — from widgets to state management.';
 
   // ── About Section ──────────────────────────────────────────────
-  static const String aboutHeading = "I'm Saad —\na Flutter developer\nbuilding for every platform.";
+  static const String aboutHeading = "I'm Muhammed Saad C — \na Flutter developer\nbuilding for every platform.";
   static const String aboutBody =
       'I am a fresher Flutter developer passionate about building beautiful, '
       'cross-platform apps. I have completed my +2 in Science and am now '
@@ -60,10 +60,10 @@ class PortfolioData {
 
   // ── Stats ──────────────────────────────────────────────────────
   static const List<Map<String, String>> stats = [
-    {'value': '47', 'unit': '', 'label': 'Apps Shipped'},
-    {'value': '5', 'unit': 'yr', 'label': 'Flutter Experience'},
-    {'value': '2', 'unit': 'M+', 'label': 'App Downloads'},
-    {'value': '98', 'unit': '%', 'label': 'Client Satisfaction'},
+    {'value': '3', 'unit': '', 'label': 'Projects Built'},
+    {'value': '2', 'unit': 'yr', 'label': 'Learning Flutter'},
+    {'value': '4', 'unit': '', 'label': 'Platforms Targeted'},
+    {'value': '100', 'unit': '%', 'label': 'Passion & Drive'},
   ];
 
   // ── Projects ───────────────────────────────────────────────────
@@ -101,24 +101,25 @@ class PortfolioData {
   // ── Experience / Journey ───────────────────────────────────────
   static const List<ExperienceModel> experiences = [
     ExperienceModel(
-    period: '2024 — PRESENT',
-      role: 'Flutter Developer (Self-Taught)',
-      company: 'Personal Projects · Kerala, India',
+      period: '2024 — PRESENT',
+      role: 'Flutter Developer (Self-Learning)',
+      company: 'Independent · Kerala, India',
       description:
-          'Building cross-platform Flutter apps covering mobile, web, and desktop. '
-          'Focused on clean architecture, state management with BLoC & Riverpod, '
-          'and delivering polished UI/UX experiences.',
-      chips: ['Flutter', 'Dart', 'BLoC', 'Riverpod', 'Firebase'],
+          'Actively building a strong foundation in Flutter and Dart. '
+          'Learning state management (Provider, Riverpod), Firebase integration, '
+          'REST APIs, and UI/UX best practices. Building real-world projects '
+          'including an inventory app, a grade calculator, and a train booking app.',
+      chips: ['Flutter', 'Dart', 'Firebase', 'Riverpod', 'REST API'],
     ),
     ExperienceModel(
-      period: '2022 — 2024',
-      role: 'Higher Secondary Education',
-      company: 'Science Stream · Kerala, India',
+      period: '2022 — 2023',
+      role: 'Higher Secondary Education — Science',
+      company: 'Plus Two · Science Stream · Kerala',
       description:
-          'Completed +2 in Science, building a strong analytical foundation. '
-          'Alongside academics, began self-learning Flutter development, '
-          'exploring mobile app development and UI design principles.',
-      chips: ['Science', 'Mathematics', 'Physics', 'Self-Learning'],
+          'Completed Higher Secondary (Plus Two) with a focus on the Science stream. '
+          'Developed strong analytical thinking and a problem-solving mindset during '
+          'these years, which laid the groundwork for my journey into software development.',
+      chips: ['Physics', 'Chemistry', 'Mathematics', 'Computer Science'],
     ),
   ];
 
@@ -136,5 +137,37 @@ class PortfolioData {
     'Figma',
     'Hive',
     'SQLite',
+  ];
+
+  // ── Typewriter phrases ──────────────────────────────────────────
+  static const List<String> aboutTypewriterPhrases = [
+    'Flutter learner & builder',
+    'Science background · Tech passion',
+    'Cross-platform enthusiast',
+    'Always learning, always growing',
+  ];
+
+  // ── About Reveal Items ──────────────────────────────────────────
+  static const List<Map<String, String>> aboutRevealItems = [
+    {
+      'num': '01',
+      'title': 'Science Background',
+      'desc': 'Completed Plus Two (Higher Secondary) in the Science stream from 2022 to 2023, building a strong analytical and logical foundation that now fuels my approach to problem-solving in code.',
+    },
+    {
+      'num': '02',
+      'title': 'Flutter Journey — 2024 to Present',
+      'desc': 'Since 2024, I have been actively learning and building with Flutter, exploring Dart, widgets, state management, and cross-platform development — and I\'m still going strong.',
+    },
+    {
+      'num': '03',
+      'title': 'Hands-On Builder',
+      'desc': 'I learn by building real projects — from inventory apps to grade calculators — turning concepts into working apps that run on Android and iOS.',
+    },
+    {
+      'num': '04',
+      'title': 'Ready to Grow',
+      'desc': 'As a fresher, I bring curiosity, dedication, and a growth mindset. I\'m eager to collaborate, contribute, and keep levelling up every single day.',
+    },
   ];
 }

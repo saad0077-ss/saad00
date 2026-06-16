@@ -71,37 +71,13 @@ class _HeroSectionState extends State<HeroSection>
 
   Widget _buildLeft(Color textColor, Color subColor) {
   return Padding(
-    padding: const EdgeInsets.fromLTRB(56, 110, 40, 80),
+    padding: const EdgeInsets.fromLTRB(56, 90, 40, 80),
     child: SingleChildScrollView(                              // ← add this
       physics: const NeverScrollableScrollPhysics(),          // ← no user scroll
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
-          FadeTransition(        
-            opacity: _fadeAnim,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 24),
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.flBlue.withOpacity(0.5), width: 2),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/IMG_20250119_163512_418.jpg'),
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.flBlue.withOpacity(0.2),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-            ),
-          ),
 
           // Eyebrow
           FadeTransition(
@@ -259,11 +235,11 @@ class _PlatformPillState extends State<_PlatformPill> {
     return MouseRegion(
       onEnter: (_) {
         setState(() => _hovered = true);
-        CursorState.isHovering.value = true;
+        CursorState.mode.value = CursorMode.hover;
       },
       onExit: (_) {
         setState(() => _hovered = false);
-        CursorState.isHovering.value = false;
+        CursorState.mode.value = CursorMode.normal;
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -329,11 +305,11 @@ class _HeroCTAState extends State<_HeroCTA> {
     return MouseRegion(
       onEnter: (_) {
         setState(() => _hovered = true);
-        CursorState.isHovering.value = true;
+        CursorState.mode.value = CursorMode.hover;
       },
       onExit: (_) {
         setState(() => _hovered = false);
-        CursorState.isHovering.value = false;
+        CursorState.mode.value = CursorMode.normal;
       },
       child: GestureDetector(
         onTap: widget.onTap,
@@ -400,7 +376,7 @@ class _DeviceShowcaseState extends State<_DeviceShowcase>
   late AnimationController _orbCtrl;
 
   @override
-  void initState() {
+  void initState() {   
     super.initState();
     // Continuous rotation/floating ticks
     _orbCtrl = AnimationController(

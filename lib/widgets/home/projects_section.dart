@@ -231,7 +231,6 @@ class _ProjectCard extends StatefulWidget {
   final Widget Function(bool isHovered) deviceMockBuilder;
 
   const _ProjectCard({
-    super.key,
     required this.number,
     required this.title,
     required this.description,
