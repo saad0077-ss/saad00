@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
 import 'package:my_portfolio/core/utils/responsive.dart';
@@ -139,6 +140,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
         {'value': 'Real-time', 'label': 'STOCK SYNC'},
         {'value': '2', 'label': 'PLATFORMS'},
       ],
+      url: 'https://creamventory-07.web.app/',
       deviceMockBuilder: (isHovered) => _CreamVentoryMock(isHovered: isHovered),
     ),
     _ProjectData(
@@ -356,6 +358,7 @@ class _ProjectData {
   final LinearGradient bgGradient;
   final List<Map<String, String>>? stats;
   final Widget Function(bool isHovered) deviceMockBuilder;
+  final String? url;
 
   _ProjectData({
     required this.number,
@@ -371,6 +374,7 @@ class _ProjectData {
     required this.bgGradient,
     this.stats,
     required this.deviceMockBuilder,
+    this.url,
   });
 }
 
@@ -624,11 +628,17 @@ class _ProjectCardState extends State<_ProjectCard> {
     );
 
     return MouseRegion(
+      cursor: widget.project.url != null ? SystemMouseCursors.click : MouseCursor.defer,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
-        onTap: () {
-          // Action for case study/GitHub
+        onTap: () async {
+          if (widget.project.url != null) {
+            final uri = Uri.parse(widget.project.url!);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          }
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
