@@ -35,7 +35,7 @@ class _PortfolioAppState extends State<PortfolioApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Saad — Flutter Developer',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, 
       theme: _themeProvider.themeData, 
       home: HomeScreen(themeProvider: _themeProvider),
     );

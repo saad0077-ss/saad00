@@ -15,7 +15,8 @@ class PortfolioFooter extends StatefulWidget {
 
 class _PortfolioFooterState extends State<PortfolioFooter> {
   late Timer _timer;
-  String _time = '';
+  String _time24 = '';
+  String _time12 = '';
 
   @override
   void initState() {
@@ -27,8 +28,13 @@ class _PortfolioFooterState extends State<PortfolioFooter> {
   void _updateTime() {
     final now = DateTime.now();
     setState(() {
-      _time =
+      _time24 =
           '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+      // 12-hour format with AM/PM
+      final h = now.hour % 12 == 0 ? 12 : now.hour % 12;
+      final ampm = now.hour >= 12 ? 'PM' : 'AM';
+      _time12 =
+          '${h.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')} $ampm';
     });
   }
 
@@ -42,48 +48,73 @@ class _PortfolioFooterState extends State<PortfolioFooter> {
   Widget build(BuildContext context) {
     final subColor = widget.isDark ? AppColors.darkText2 : AppColors.lightText2;
     final border = widget.isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
+    final copyrightText = Text(
+      '© 2026 ${PortfolioData.name} · Flutter Developer',
+      style: TextStyle(
+        fontFamily: 'JetBrainsMono',
+        fontSize: isMobile ? 12 : 11,
+        fontWeight: FontWeight.w400,
+        color: subColor,
+        letterSpacing: 0.5,
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final timeText = Text(
+      isMobile ? _time12 : _time24,
+      style: TextStyle(
+        fontFamily: 'JetBrainsMono',
+        fontSize: isMobile ? 12 : 11,
+        fontWeight: FontWeight.w400,
+        color: AppColors.flCyan,
+        letterSpacing: 1,
+      ),
+      textAlign: TextAlign.center,
+    );
+
+    final locationText = Text(
+      PortfolioData.location,
+      style: TextStyle(
+        fontFamily: 'JetBrainsMono',
+        fontSize: isMobile ? 12 : 11,
+        fontWeight: FontWeight.w400,
+        color: subColor,
+        letterSpacing: 0.5,
+      ),
+      textAlign: TextAlign.center,
+    );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 28),
-      margin: const EdgeInsets.only(top: 80),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 24 : 56,
+        vertical: isMobile ? 20 : 28,
+      ),
+      margin: EdgeInsets.only(top: isMobile ? 40 : 80),
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: border)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '© 2026 ${PortfolioData.name} · Flutter Developer',
-            style: TextStyle(
-              fontFamily: 'JetBrainsMono',
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
-              color: subColor,
-              letterSpacing: 0.5,
+      child: isMobile
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                copyrightText,
+                const SizedBox(height: 8),
+                timeText,
+                const SizedBox(height: 8),
+                locationText,
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                copyrightText,
+                timeText,
+                locationText,
+              ],
             ),
-          ),
-          Text(
-            _time,
-            style: const TextStyle(
-              fontFamily: 'JetBrainsMono',
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
-              color: AppColors.flCyan,
-              letterSpacing: 1,
-            ),
-          ),
-          Text(
-            PortfolioData.location,
-            style: TextStyle(
-              fontFamily: 'JetBrainsMono',
-              fontSize: 11,
-              fontWeight: FontWeight.w400,
-              color: subColor,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

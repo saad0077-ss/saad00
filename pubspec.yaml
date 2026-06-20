@@ -26,6 +26,7 @@ dependencies:
   flutter:
     sdk: flutter
   url_launcher: ^6.2.5      # For opening GitHub / social links
+  font_awesome_flutter: ^11.0.0  # Beautiful social icons
  
 dev_dependencies:
   flutter_test:
