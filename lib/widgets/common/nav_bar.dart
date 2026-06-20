@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
-import 'package:my_portfolio/core/data/portfolio_data.dart';
 
 
 /// Top navigation bar with logo, nav links, theme toggle, and hire button.
@@ -78,7 +77,7 @@ class PortfolioNavBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'flutter.dev',
+                    'saad.dev', 
                     style: TextStyle(
                       fontFamily: 'Syne',
                       fontSize: 15,

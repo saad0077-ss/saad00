@@ -117,17 +117,17 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
   Duration _lastElapsedTime = Duration.zero;
   static const double _spacing = 20.0;
 
-  final List<_ProjectData> projects = [
+  final List<_ProjectData> projects = [ 
     _ProjectData(
       number: '001 · FEATURED',
       title: 'CreamVentory\nInventory App',
       description:
           'A smart inventory management app for cream & cosmetics businesses. Track stock, manage products, monitor sales, and get low-stock alerts — all in a clean, intuitive Flutter interface.',
-      tags: const ['Flutter', 'Firebase', 'Riverpod', 'Dart'],
-      platforms: const ['Android', 'iOS'],
+      tags: const ['Flutter', 'Hive', 'Riverpod', 'Dart','Animation'],
+      platforms: const ['Android', 'iOS','Web'],
       isFeatured: true,
       accentColor: const Color(0xFFF59E0B),
-      accentColor2: const Color(0xFFFCD34D),
+      accentColor2: const Color(0xFFFCD34D), 
       glowColor: const Color(0x2EF59E0B),
       bgGradient: const LinearGradient(
         colors: [Color(0xFF1A0F00), Color(0xFF261600)],
@@ -146,8 +146,8 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
       title: 'Grade Calculator',
       description:
           'A student-focused grade calculator app that computes GPA, predicts semester outcomes, and visualises academic progress with clean charts and subject-wise breakdowns.',
-      tags: const ['Flutter', 'Dart', 'Charts', 'SharedPreferences'],
-      platforms: const ['Android', 'iOS'],
+      tags: const ['Flutter', 'Dart', 'Charts', 'SharedPreferences','Hive'],
+      platforms: const ['Android', 'Web','Windows'],
       isFeatured: false,
       accentColor: const Color(0xFF7C4DFF),
       accentColor2: const Color(0xFFA78BFA),
@@ -158,14 +158,14 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
         end: Alignment.bottomRight,
       ),
       deviceMockBuilder: (isHovered) => _GradeCalculatorMock(isHovered: isHovered),
-    ),
+    ),   
     _ProjectData(
       number: '003',
       title: 'TrainGo — Train Booking',
       description:
           'A full-featured train ticket booking app with real-time seat availability, route search, PNR tracking, and seamless payment integration. Currently under active development.',
       tags: const ['Flutter', 'Firebase', 'REST API', 'Razorpay'],
-      platforms: const ['Android', 'iOS'],
+      platforms: const ['Android', 'iOS','Windows','Web'],
       isFeatured: false,
       statusBadge: const _InDevelopmentBadge(),
       accentColor: const Color(0xFF027DFD),
@@ -304,7 +304,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
                     ),
                   ),
                 );
-              }).toList(),
+              }),
               // Second pass (for infinite loop effect)
               ...projects.map((project) {
                 final cardW = _getCardWidth(project);
@@ -332,7 +332,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
                     ),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),
