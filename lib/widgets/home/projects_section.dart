@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
 import 'package:my_portfolio/core/utils/responsive.dart';
 
@@ -22,13 +23,13 @@ class ProjectsSection extends StatelessWidget {
                 ? 48.0
                 : 24.0;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: paddingX),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section header
-          Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section header with padding
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingX),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
@@ -67,149 +68,310 @@ class ProjectsSection extends StatelessWidget {
               const SizedBox(height: 64),
             ],
           ),
+        ),
 
-          // Responsive grid layout
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 900;
-              return Column(
-                children: [
-                  // Project 001: CreamVentory (Featured) - spans 2 columns in horizontal row
-                  _ProjectCard(
-                    number: '001 · FEATURED',
-                    title: 'CreamVentory\nInventory App',
-                    description:
-                        'A smart inventory management app for cream & cosmetics businesses. Track stock, manage products, monitor sales, and get low-stock alerts — all in a clean, intuitive Flutter interface.',
-                    tags: const ['Flutter', 'Firebase', 'Riverpod', 'Dart'],
-                    platforms: const ['Android', 'iOS'],
-                    isDark: isDark,
-                    isFeatured: true,
-                    accentColor: const Color(0xFFF59E0B),
-                    accentColor2: const Color(0xFFFCD34D),
-                    glowColor: const Color(0x2EF59E0B),
-                    bgGradient: const LinearGradient(
-                      colors: [Color(0xFF1A0F00), Color(0xFF261600)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+        // Horizontal scrollable carousel spanning full width edge-to-edge
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = screenWidth > 900;
+            final cardWidth = isWide
+                ? 750.0
+                : (screenWidth < 460 ? screenWidth - 32.0 : 420.0);
+
+            return _ContinuousHorizontalScroll(
+              cardWidth: cardWidth,
+              isDark: isDark,
+              isWide: isWide,
+            );
+          },
+        ),
+        const SizedBox(height: 120),
+      ],
+    );
+  }
+}
+
+/// Continuous horizontal scrolling carousel widget
+class _ContinuousHorizontalScroll extends StatefulWidget {
+  final double cardWidth;
+  final bool isDark;
+  final bool isWide;
+
+  const _ContinuousHorizontalScroll({
+    required this.cardWidth,
+    required this.isDark,
+    required this.isWide,
+  });
+
+  @override
+  State<_ContinuousHorizontalScroll> createState() => _ContinuousHorizontalScrollState();
+}
+
+class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll>
+    with SingleTickerProviderStateMixin {
+  late ScrollController _scrollController;
+  late Ticker _ticker; 
+  double _scrollOffset = 0.0;
+  double _currentSpeed = 35.0; // pixels per second
+  double _targetSpeed = 35.0; // pixels per second
+  Duration _lastElapsedTime = Duration.zero;
+  static const double _spacing = 20.0;
+
+  final List<_ProjectData> projects = [
+    _ProjectData(
+      number: '001 · FEATURED',
+      title: 'CreamVentory\nInventory App',
+      description:
+          'A smart inventory management app for cream & cosmetics businesses. Track stock, manage products, monitor sales, and get low-stock alerts — all in a clean, intuitive Flutter interface.',
+      tags: const ['Flutter', 'Firebase', 'Riverpod', 'Dart'],
+      platforms: const ['Android', 'iOS'],
+      isFeatured: true,
+      accentColor: const Color(0xFFF59E0B),
+      accentColor2: const Color(0xFFFCD34D),
+      glowColor: const Color(0x2EF59E0B),
+      bgGradient: const LinearGradient(
+        colors: [Color(0xFF1A0F00), Color(0xFF261600)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      stats: const [
+        {'value': '100%', 'label': 'OFFLINE READY'},
+        {'value': 'Real-time', 'label': 'STOCK SYNC'},
+        {'value': '2', 'label': 'PLATFORMS'},
+      ],
+      deviceMockBuilder: (isHovered) => _CreamVentoryMock(isHovered: isHovered),
+    ),
+    _ProjectData(
+      number: '002',
+      title: 'Grade Calculator',
+      description:
+          'A student-focused grade calculator app that computes GPA, predicts semester outcomes, and visualises academic progress with clean charts and subject-wise breakdowns.',
+      tags: const ['Flutter', 'Dart', 'Charts', 'SharedPreferences'],
+      platforms: const ['Android', 'iOS'],
+      isFeatured: false,
+      accentColor: const Color(0xFF7C4DFF),
+      accentColor2: const Color(0xFFA78BFA),
+      glowColor: const Color(0x267C4DFF),
+      bgGradient: const LinearGradient(
+        colors: [Color(0xFF0B0618), Color(0xFF120A24)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      deviceMockBuilder: (isHovered) => _GradeCalculatorMock(isHovered: isHovered),
+    ),
+    _ProjectData(
+      number: '003',
+      title: 'TrainGo — Train Booking',
+      description:
+          'A full-featured train ticket booking app with real-time seat availability, route search, PNR tracking, and seamless payment integration. Currently under active development.',
+      tags: const ['Flutter', 'Firebase', 'REST API', 'Razorpay'],
+      platforms: const ['Android', 'iOS'],
+      isFeatured: false,
+      statusBadge: const _InDevelopmentBadge(),
+      accentColor: const Color(0xFF027DFD),
+      accentColor2: const Color(0xFF54C5F8),
+      glowColor: const Color(0x26027DFD),
+      bgGradient: const LinearGradient(
+        colors: [Color(0xFF031014), Color(0xFF050F1C)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      deviceMockBuilder: (isHovered) => _TrainGoMock(isHovered: isHovered),
+    ),
+  ];
+
+  double _getCardWidth(_ProjectData project) {
+    double baseW = project.isFeatured
+        ? (widget.isWide ? 950.0 : 480.0)
+        : widget.cardWidth;
+
+    // Calculate dynamic extra width based on content size to avoid overflow
+    final int textLength = project.description.length + project.title.length;
+    final int threshold = project.isFeatured ? 250 : 180;
+    
+    if (textLength > threshold) {
+      baseW += ((textLength - threshold) / 50).ceil() * 60.0;
+    }
+
+    // Account for extra stats in featured projects
+    if (project.isFeatured && project.stats != null && project.stats!.length > 3) {
+      baseW += (project.stats!.length - 3) * 120.0;
+    }
+
+    // Clamp width on mobile/tablet viewports to fit the screen
+    if (!widget.isWide) {
+      final screenWidth = MediaQuery.of(context).size.width;
+      if (baseW > screenWidth - 32.0) {
+        baseW = screenWidth - 32.0;
+      }
+    }
+
+    return baseW;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _ticker = createTicker((elapsed) {
+      if (!mounted || !_scrollController.hasClients) return;
+      if (_lastElapsedTime == Duration.zero) {
+        _lastElapsedTime = elapsed;
+        return;
+      }
+      final double deltaTime = (elapsed - _lastElapsedTime).inMicroseconds / 1000000.0;
+      _lastElapsedTime = elapsed;
+
+      // Smoothly interpolate current speed towards target speed for deceleration/acceleration
+      _currentSpeed = _currentSpeed + (_targetSpeed - _currentSpeed) * 0.1;
+
+      if (_currentSpeed.abs() > 0.01) {
+        _scrollOffset += _currentSpeed * deltaTime;
+        
+        double singleSetWidth = 0.0;
+        for (final project in projects) {
+          singleSetWidth += _getCardWidth(project) + _spacing;
+        }
+        
+        while (_scrollOffset >= singleSetWidth) {
+          _scrollOffset -= singleSetWidth;
+        }
+        while (_scrollOffset < 0) {
+          _scrollOffset += singleSetWidth;
+        }
+
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollOffset);
+        }
+      }
+    });
+
+    _ticker.start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _targetSpeed = 0.0;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _targetSpeed = 35.0;
+        });
+      },
+      child: SizedBox(
+        height: widget.isWide ? 530 : 600,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          controller: _scrollController,
+          physics: const NeverScrollableScrollPhysics(), // Disable manual scroll
+          child: Row(
+            children: [
+              // First pass
+              ...projects.map((project) {
+                final cardW = _getCardWidth(project);
+                return Padding(
+                  padding: const EdgeInsets.only(right: _spacing),
+                  child: SizedBox(
+                    width: cardW,
+                    height: widget.isWide ? 530 : 600,
+                    child: _ProjectCard(
+                      number: project.number,
+                      title: project.title,
+                      description: project.description,
+                      tags: project.tags,
+                      platforms: project.platforms,
+                      isDark: widget.isDark,
+                      isFeatured: project.isFeatured,
+                      statusBadge: project.statusBadge,
+                      accentColor: project.accentColor,
+                      accentColor2: project.accentColor2,
+                      glowColor: project.glowColor,
+                      bgGradient: project.bgGradient,
+                      stats: project.stats,
+                      isWide: widget.isWide,
+                      deviceMockBuilder: project.deviceMockBuilder,
                     ),
-                    stats: const [
-                      {'value': '100%', 'label': 'OFFLINE READY'},
-                      {'value': 'Real-time', 'label': 'STOCK SYNC'},
-                      {'value': '2', 'label': 'PLATFORMS'},
-                    ],
-                    isWide: isWide,
-                    deviceMockBuilder: (isHovered) => _CreamVentoryMock(isHovered: isHovered),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Project 002 & 003: Row on wide, Column on mobile
-                  if (isWide)
-                    IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: _ProjectCard(
-                              number: '002',
-                              title: 'Grade Calculator',
-                              description:
-                                  'A student-focused grade calculator app that computes GPA, predicts semester outcomes, and visualises academic progress with clean charts and subject-wise breakdowns.',
-                              tags: const ['Flutter', 'Dart', 'Charts', 'SharedPreferences'],
-                              platforms: const ['Android', 'iOS'],
-                              isDark: isDark,
-                              isFeatured: false,
-                              accentColor: const Color(0xFF7C4DFF),
-                              accentColor2: const Color(0xFFA78BFA),
-                              glowColor: const Color(0x267C4DFF),
-                              bgGradient: const LinearGradient(
-                                colors: [Color(0xFF0B0618), Color(0xFF120A24)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              isWide: isWide,
-                              deviceMockBuilder: (isHovered) => _GradeCalculatorMock(isHovered: isHovered),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: _ProjectCard(
-                              number: '003',
-                              title: 'TrainGo — Train Booking',
-                              description:
-                                  'A full-featured train ticket booking app with real-time seat availability, route search, PNR tracking, and seamless payment integration. Currently under active development.',
-                              tags: const ['Flutter', 'Firebase', 'REST API', 'Razorpay'],
-                              platforms: const ['Android', 'iOS'],
-                              isDark: isDark,
-                              isFeatured: false,
-                              statusBadge: const _InDevelopmentBadge(),
-                              accentColor: const Color(0xFF027DFD),
-                              accentColor2: const Color(0xFF54C5F8),
-                              glowColor: const Color(0x26027DFD),
-                              bgGradient: const LinearGradient(
-                                colors: [Color(0xFF031014), Color(0xFF050F1C)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              isWide: isWide,
-                              deviceMockBuilder: (isHovered) => _TrainGoMock(isHovered: isHovered),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else ...[
-                    _ProjectCard(
-                      number: '002',
-                      title: 'Grade Calculator',
-                      description:
-                          'A student-focused grade calculator app that computes GPA, predicts semester outcomes, and visualises academic progress with clean charts and subject-wise breakdowns.',
-                      tags: const ['Flutter', 'Dart', 'Charts', 'SharedPreferences'],
-                      platforms: const ['Android', 'iOS'],
-                      isDark: isDark,
-                      isFeatured: false,
-                      accentColor: const Color(0xFF7C4DFF),
-                      accentColor2: const Color(0xFFA78BFA),
-                      glowColor: const Color(0x267C4DFF),
-                      bgGradient: const LinearGradient(
-                        colors: [Color(0xFF0B0618), Color(0xFF120A24)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      isWide: isWide,
-                      deviceMockBuilder: (isHovered) => _GradeCalculatorMock(isHovered: isHovered),
+                );
+              }).toList(),
+              // Second pass (for infinite loop effect)
+              ...projects.map((project) {
+                final cardW = _getCardWidth(project);
+                return Padding(
+                  padding: const EdgeInsets.only(right: _spacing),
+                  child: SizedBox(
+                    width: cardW,
+                    height: widget.isWide ? 530 : 600,
+                    child: _ProjectCard(
+                      number: project.number,
+                      title: project.title,
+                      description: project.description,
+                      tags: project.tags,
+                      platforms: project.platforms,
+                      isDark: widget.isDark,
+                      isFeatured: project.isFeatured,
+                      statusBadge: project.statusBadge,
+                      accentColor: project.accentColor,
+                      accentColor2: project.accentColor2,
+                      glowColor: project.glowColor,
+                      bgGradient: project.bgGradient,
+                      stats: project.stats,
+                      isWide: widget.isWide,
+                      deviceMockBuilder: project.deviceMockBuilder,
                     ),
-                    const SizedBox(height: 20),
-                    _ProjectCard(
-                      number: '003',
-                      title: 'TrainGo — Train Booking',
-                      description:
-                          'A full-featured train ticket booking app with real-time seat availability, route search, PNR tracking, and seamless payment integration. Currently under active development.',
-                      tags: const ['Flutter', 'Firebase', 'REST API', 'Razorpay'],
-                      platforms: const ['Android', 'iOS'],
-                      isDark: isDark,
-                      isFeatured: false,
-                      statusBadge: const _InDevelopmentBadge(),
-                      accentColor: const Color(0xFF027DFD),
-                      accentColor2: const Color(0xFF54C5F8),
-                      glowColor: const Color(0x26027DFD),
-                      bgGradient: const LinearGradient(
-                        colors: [Color(0xFF031014), Color(0xFF050F1C)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      isWide: isWide,
-                      deviceMockBuilder: (isHovered) => _TrainGoMock(isHovered: isHovered),
-                    ),
-                  ],
-                ],
-              );
-            },
+                  ),
+                );
+              }).toList(),
+            ],
           ),
-          const SizedBox(height: 120),
-        ],
+        ),
       ),
     );
   }
+}
+
+/// Project data model
+class _ProjectData {
+  final String number;
+  final String title;
+  final String description;
+  final List<String> tags;
+  final List<String> platforms;
+  final bool isFeatured;
+  final Widget? statusBadge;
+  final Color accentColor;
+  final Color accentColor2;
+  final Color glowColor;
+  final LinearGradient bgGradient;
+  final List<Map<String, String>>? stats;
+  final Widget Function(bool isHovered) deviceMockBuilder;
+
+  _ProjectData({
+    required this.number,
+    required this.title,
+    required this.description,
+    required this.tags,
+    required this.platforms,
+    required this.isFeatured,
+    this.statusBadge,
+    required this.accentColor,
+    required this.accentColor2,
+    required this.glowColor,
+    required this.bgGradient,
+    this.stats,
+    required this.deviceMockBuilder,
+  });
 }
 
 /// Project Card Widget with hover micro-interactions
@@ -263,113 +425,119 @@ class _ProjectCardState extends State<_ProjectCard> {
 
     // Info component
     final infoWidget = Padding(
-      padding: EdgeInsets.all(widget.isFeatured ? (widget.isWide ? 44.0 : 32.0) : 28.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.isFeatured ? (widget.isWide ? 36.0 : 28.0) : 24.0,
+        vertical: widget.isFeatured ? (widget.isWide ? 28.0 : 20.0) : 18.0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.number,
-                style: const TextStyle(
-                  fontFamily: 'JetBrainsMono',
-                  fontSize: 10,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 2.0,
-                  color: AppColors.flCyan,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 10,
-                runSpacing: 4,
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.title,
-                    style: TextStyle(
-                      fontFamily: 'Syne',
-                      fontSize: widget.isFeatured ? (widget.isWide ? 32 : 26) : 22,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: widget.isFeatured ? -1.5 : -0.6,
-                      height: 1.15,
-                      color: widget.isDark ? AppColors.darkText : AppColors.lightText,
+                    widget.number,
+                    style: const TextStyle(
+                      fontFamily: 'JetBrainsMono',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 2.0,
+                      color: AppColors.flCyan,
                     ),
                   ),
-                  if (widget.statusBadge != null) widget.statusBadge!,
-                ],
-              ), 
-              const SizedBox(height: 12),
-              Text(
-                widget.description,
-                style: TextStyle(
-                  fontFamily: 'Syne',
-                  fontSize: widget.isFeatured ? 14 : 13,
-                  height: 1.75,
-                  color: widget.isDark ? AppColors.darkText2 : AppColors.lightText2,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: widget.tags
-                    .map((tag) => _TagWidget(
-                          tag: tag,
-                          isDark: widget.isDark,
-                          isHovered: _hovered,
-                        ))
-                    .toList(),
-              ),
-            ],
-          ),
-          if (widget.isFeatured && widget.stats != null) ...[
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: widget.stats!.map((stat) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 28.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 6),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    runSpacing: 4,
                     children: [
-                      ShaderMask(
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [widget.accentColor, widget.accentColor2],
-                        ).createShader(bounds),
-                        child: Text(
-                          stat['value'] ?? '',
-                          style: const TextStyle(
-                            fontFamily: 'Syne',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -1,
-                            color: Colors.white, // essential for shader
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
                       Text(
-                        stat['label'] ?? '',
+                        widget.title,
                         style: TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 9,
-                          letterSpacing: 1,
-                          color: widget.isDark ? AppColors.darkText3 : AppColors.lightText3,
+                          fontFamily: 'Syne',
+                          fontSize: widget.isFeatured ? (widget.isWide ? 30 : 24) : 20,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: widget.isFeatured ? -1.2 : -0.6,
+                          height: 1.15,
+                          color: widget.isDark ? AppColors.darkText : AppColors.lightText,
                         ),
                       ),
+                      if (widget.statusBadge != null) widget.statusBadge!,
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.description,
+                    style: TextStyle(
+                      fontFamily: 'Syne',
+                      fontSize: widget.isFeatured ? 13 : 12,
+                      height: 1.6,
+                      color: widget.isDark ? AppColors.darkText2 : AppColors.lightText2,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: widget.tags
+                        .map((tag) => _TagWidget(
+                              tag: tag,
+                              isDark: widget.isDark,
+                              isHovered: _hovered,
+                            ))
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (widget.isFeatured && widget.stats != null) ...[
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 20,
+              runSpacing: 10,
+              children: widget.stats!.map((stat) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [widget.accentColor, widget.accentColor2],
+                      ).createShader(bounds),
+                      child: Text(
+                        stat['value'] ?? '',
+                        style: const TextStyle(
+                          fontFamily: 'Syne',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -1,
+                          color: Colors.white, // essential for shader
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      stat['label'] ?? '',
+                      style: TextStyle(
+                        fontFamily: 'JetBrainsMono',
+                        fontSize: 9,
+                        letterSpacing: 1,
+                        color: widget.isDark ? AppColors.darkText3 : AppColors.lightText3,
+                      ),
+                    ),
+                  ],
                 );
               }).toList(),
             ),
           ],
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           // Footer border-top
           Container(
-            padding: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.only(top: 12),
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
@@ -377,10 +545,15 @@ class _ProjectCardState extends State<_ProjectCard> {
                 ),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Row(
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
                   children: widget.platforms
                       .map((p) => _PlatformPill(
                             platform: p,
@@ -404,7 +577,6 @@ class _ProjectCardState extends State<_ProjectCard> {
 
     // Visual Showcase component
     final visualWidget = Container(
-      height: widget.isFeatured ? (widget.isWide ? null : 240) : 220,
       decoration: BoxDecoration(
         gradient: widget.bgGradient,
       ),
@@ -440,7 +612,10 @@ class _ProjectCardState extends State<_ProjectCard> {
           Positioned.fill(
             child: ClipRect(
               child: Center(
-                child: widget.deviceMockBuilder(_hovered),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: widget.deviceMockBuilder(_hovered),
+                ),
               ),
             ),
           ),
@@ -478,25 +653,23 @@ class _ProjectCardState extends State<_ProjectCard> {
           clipBehavior: Clip.antiAlias,
           child: widget.isFeatured
               ? (widget.isWide
-                  ? IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: infoWidget),
-                          Expanded(child: visualWidget),
-                        ],
-                      ),
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: infoWidget),
+                        Expanded(child: visualWidget),
+                      ],
                     )
                   : Column(
                       children: [
-                        visualWidget,
-                        infoWidget,
+                        Expanded(flex: 4, child: visualWidget),
+                        Expanded(flex: 6, child: infoWidget),
                       ],
                     ))
               : Column(
                   children: [
-                    visualWidget,
-                    infoWidget,
+                    Expanded(flex: 4, child: visualWidget),
+                    Expanded(flex: 5, child: infoWidget),
                   ],
                 ),
         ),
@@ -894,10 +1067,10 @@ class _CreamVentoryMock extends StatelessWidget {
                               gradient: const LinearGradient(colors: [accentColor, accentColor2]),
                             ),
                             padding: const EdgeInsets.all(4),
-                            child: Column(
+                            child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
+                              children: [
                                 Text(
                                   'TOTAL STOCK',
                                   style: TextStyle(
@@ -981,18 +1154,18 @@ class _CreamVentoryMock extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 _AnimatedBar(initialHeightFactor: 0.40, color: accentColor.withOpacity(0.18)),
-                                _AnimatedBar(
+                                const _AnimatedBar(
                                   initialHeightFactor: 0.78,
-                                  gradient: const LinearGradient(
+                                  gradient: LinearGradient(
                                     colors: [accentColor, accentColor2],
                                     begin: Alignment.bottomCenter,
                                     end: Alignment.topCenter,
                                   ),
                                 ),
                                 _AnimatedBar(initialHeightFactor: 0.52, color: accentColor.withOpacity(0.18)),
-                                _AnimatedBar(
+                                const _AnimatedBar(
                                   initialHeightFactor: 0.92,
-                                  gradient: const LinearGradient(
+                                  gradient: LinearGradient(
                                     colors: [accentColor, accentColor2],
                                     begin: Alignment.bottomCenter,
                                     end: Alignment.topCenter,
@@ -1065,10 +1238,10 @@ class _GradeCalculatorMock extends StatelessWidget {
                       gradient: const LinearGradient(colors: [accentColor, accentColor2]),
                     ),
                     padding: const EdgeInsets.all(4),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [
+                      children: [
                         Text(
                           'CURRENT GPA',
                           style: TextStyle(
@@ -1152,18 +1325,18 @@ class _GradeCalculatorMock extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         _AnimatedBar(initialHeightFactor: 0.60, color: accentColor.withOpacity(0.18)),
-                        _AnimatedBar(
+                        const _AnimatedBar(
                           initialHeightFactor: 0.90,
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [accentColor, accentColor2],
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                           ),
                         ),
                         _AnimatedBar(initialHeightFactor: 0.75, color: accentColor.withOpacity(0.18)),
-                        _AnimatedBar(
+                        const _AnimatedBar(
                           initialHeightFactor: 0.85,
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             colors: [accentColor, accentColor2],
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
@@ -1174,8 +1347,8 @@ class _GradeCalculatorMock extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  _MockListItem(dotColor: accentColor, lineFraction: 0.75),
-                  _MockListItem(dotColor: accentColor2, lineFraction: 0.65),
+                  const _MockListItem(dotColor: accentColor, lineFraction: 0.75),
+                  const _MockListItem(dotColor: accentColor2, lineFraction: 0.65),
                   _MockListItem(dotColor: accentColor.withOpacity(0.5), lineFraction: 0.80),
                 ],
               ),
@@ -1233,10 +1406,10 @@ class _TrainGoMock extends StatelessWidget {
                       gradient: const LinearGradient(colors: [accentColor, accentColor2]),
                     ),
                     padding: const EdgeInsets.all(4),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [
+                      children: [
                         Text(
                           'NEXT TRAIN',
                           style: TextStyle(
@@ -1573,4 +1746,4 @@ class _InDevelopmentBadge extends StatelessWidget {
       ),
     );
   }
-}
+} 
