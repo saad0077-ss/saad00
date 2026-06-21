@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
 import 'package:my_portfolio/core/utils/responsive.dart';
+import 'dart:ui' show ImageFilter;
 
 /// Projects section — modern card grid matching HTML design.
 class ProjectsSection extends StatelessWidget {
@@ -141,6 +142,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
         {'value': '2', 'label': 'PLATFORMS'},
       ],
       url: 'https://creamventory-07.web.app/',
+      playStoreUrl: 'https://play.google.com/store/apps/details?id=com.muhammedsaad.creamventory&pcampaignid=web_share',
       deviceMockBuilder: (isHovered) => _CreamVentoryMock(isHovered: isHovered),
     ),
     _ProjectData(
@@ -272,7 +274,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
         });
       },
       child: SizedBox(
-        height: widget.isWide ? 530 : 600,
+        height: widget.isWide ? 550 : 620,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           controller: _scrollController,
@@ -283,7 +285,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
               ...projects.map((project) {
                 final cardW = _getCardWidth(project);
                 return Padding(
-                  padding: const EdgeInsets.only(right: _spacing),
+                  padding: const EdgeInsets.only(right: _spacing, top: 10, bottom: 10),
                   child: SizedBox(
                     width: cardW,
                     height: widget.isWide ? 530 : 600,
@@ -303,6 +305,8 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
                       stats: project.stats,
                       isWide: widget.isWide,
                       deviceMockBuilder: project.deviceMockBuilder,
+                      url: project.url,
+                      playStoreUrl: project.playStoreUrl,
                     ),
                   ),
                 );
@@ -311,7 +315,7 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
               ...projects.map((project) {
                 final cardW = _getCardWidth(project);
                 return Padding(
-                  padding: const EdgeInsets.only(right: _spacing),
+                  padding: const EdgeInsets.only(right: _spacing, top: 10, bottom: 10),
                   child: SizedBox(
                     width: cardW,
                     height: widget.isWide ? 530 : 600,
@@ -331,6 +335,8 @@ class _ContinuousHorizontalScrollState extends State<_ContinuousHorizontalScroll
                       stats: project.stats,
                       isWide: widget.isWide,
                       deviceMockBuilder: project.deviceMockBuilder,
+                      url: project.url,
+                      playStoreUrl: project.playStoreUrl,
                     ),
                   ),
                 );
@@ -359,6 +365,7 @@ class _ProjectData {
   final List<Map<String, String>>? stats;
   final Widget Function(bool isHovered) deviceMockBuilder;
   final String? url;
+  final String? playStoreUrl;
 
   _ProjectData({
     required this.number,
@@ -375,10 +382,11 @@ class _ProjectData {
     this.stats,
     required this.deviceMockBuilder,
     this.url,
+    this.playStoreUrl,
   });
 }
 
-/// Project Card Widget with hover micro-interactions
+/// Project Card Widget with hover micro-interactions (Desktop) and tap interactions (Mobile)
 class _ProjectCard extends StatefulWidget {
   final String number;
   final String title;
@@ -395,6 +403,8 @@ class _ProjectCard extends StatefulWidget {
   final List<Map<String, String>>? stats;
   final bool isWide;
   final Widget Function(bool isHovered) deviceMockBuilder;
+  final String? url;
+  final String? playStoreUrl;
 
   const _ProjectCard({
     required this.number,
@@ -412,6 +422,8 @@ class _ProjectCard extends StatefulWidget {
     this.stats,
     required this.isWide,
     required this.deviceMockBuilder,
+    this.url,
+    this.playStoreUrl,
   });
 
   @override
@@ -420,6 +432,35 @@ class _ProjectCard extends StatefulWidget {
 
 class _ProjectCardState extends State<_ProjectCard> {
   bool _hovered = false;
+
+  void _showPlatformDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return _PlatformSelectionDialog(
+          title: widget.title.replaceAll('\n', ' '),
+          webUrl: widget.url!,
+          playStoreUrl: widget.playStoreUrl!,
+          isDark: widget.isDark,
+          accentColor: widget.accentColor,
+          accentColor2: widget.accentColor2,
+        );
+      },
+    );
+  }
+
+  // Handle opening the project URL
+  Future<void> _openProject() async {
+    if (widget.url != null && widget.playStoreUrl != null) {
+      _showPlatformDialog();
+    } else if (widget.url != null) {
+      final uri = Uri.parse(widget.url!);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication); 
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -627,19 +668,31 @@ class _ProjectCardState extends State<_ProjectCard> {
       ),
     );
 
-    return MouseRegion(
-      cursor: widget.project.url != null ? SystemMouseCursors.click : MouseCursor.defer,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: () async {
-          if (widget.project.url != null) {
-            final uri = Uri.parse(widget.project.url!);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
+    return GestureDetector(
+      // ===== MOBILE INTERACTION =====
+      // On mobile: Single tap opens the link immediately
+      onTap: () {
+        // Show animation feedback briefly
+        setState(() {
+          _hovered = true;
+        });
+        // Open the project link immediately
+        _openProject();
+        // Optional: Hide animation after 200ms for visual feedback
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) {
+            setState(() {
+              _hovered = false;
+            });
           }
-        },
+        });
+      },
+      child: MouseRegion(
+        // ===== DESKTOP INTERACTION =====
+        // On desktop: Mouse hover for smooth animations
+        cursor: (widget.url != null || widget.playStoreUrl != null) ? SystemMouseCursors.click : MouseCursor.defer,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOutCubic,
@@ -752,7 +805,7 @@ class _MeshBackgroundState extends State<_MeshBackground> with SingleTickerProvi
                 ),
                 Positioned.fill(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: BoxDecoration( 
                       gradient: RadialGradient(
                         center: const Alignment(0.6, -0.6), // circle at 80% 20% approx
                         radius: 0.55,
@@ -868,7 +921,7 @@ class _PhoneMockChassis extends StatelessWidget {
         gradient: const LinearGradient(
           colors: [Color(0xFF1E2940), Color(0xFF111827)],
           begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          end: Alignment.bottomRight, 
         ),
         boxShadow: [
           BoxShadow(
@@ -1756,4 +1809,256 @@ class _InDevelopmentBadge extends StatelessWidget {
       ),
     );
   }
-} 
+}
+
+/// A premium, responsive platform selection modal matching Saad's portfolio style
+class _PlatformSelectionDialog extends StatelessWidget {
+  final String title;
+  final String webUrl;
+  final String playStoreUrl;
+  final bool isDark;
+  final Color accentColor;
+  final Color accentColor2;
+
+  const _PlatformSelectionDialog({
+    required this.title,
+    required this.webUrl,
+    required this.playStoreUrl,
+    required this.isDark,
+    required this.accentColor,
+    required this.accentColor2,
+  });
+
+  Future<void> _launch(BuildContext context, String urlString) async {
+    Navigator.of(context).pop();
+    final uri = Uri.parse(urlString);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final titleColor = isDark ? AppColors.darkText : AppColors.lightText;
+    final subColor = isDark ? AppColors.darkText2 : AppColors.lightText2;
+    final dialogBg = isDark ? AppColors.darkBg2 : AppColors.lightBg2;
+    final borderColor = isDark ? AppColors.darkBorder2 : AppColors.lightBorder2;
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Container(
+            decoration: BoxDecoration(
+              color: dialogBg.withOpacity(0.92),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: borderColor,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.35),
+                  blurRadius: 40,
+                  offset: const Offset(0, 20),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.only(left: 24, right: 24, top: 28, bottom: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Open $title',
+                        style: TextStyle(
+                          fontFamily: 'Syne',
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: titleColor,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      color: subColor,
+                      onPressed: () => Navigator.of(context).pop(),
+                      splashRadius: 20,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Select how you would like to view or experience this project:',
+                  style: TextStyle(
+                    fontFamily: 'Syne',
+                    fontSize: 14,
+                    color: subColor,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Options list
+                _DialogOptionCard(
+                  icon: Icons.android_rounded,
+                  iconColor: const Color(0xFF3DDC84), // Android Green
+                  title: 'Google Play Store',
+                  subtitle: 'Download and install the native Android app',
+                  accentColor: accentColor,
+                  isDark: isDark,
+                  onTap: () => _launch(context, playStoreUrl),
+                ),
+                _DialogOptionCard(
+                  icon: Icons.language_rounded,
+                  iconColor: const Color(0xFF4FC3F7), // Web Blue
+                  title: 'Web Application',
+                  subtitle: 'Explore the live website directly in your browser',
+                  accentColor: accentColor,
+                  isDark: isDark,
+                  onTap: () => _launch(context, webUrl),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stateful hover choice card for platform select dialog
+class _DialogOptionCard extends StatefulWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool isDark;
+  final Color accentColor;
+
+  const _DialogOptionCard({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    required this.isDark,
+    required this.accentColor,
+  });
+
+  @override
+  State<_DialogOptionCard> createState() => _DialogOptionCardState();
+}
+
+class _DialogOptionCardState extends State<_DialogOptionCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final cardBg = widget.isDark ? AppColors.darkBg3 : AppColors.lightBg3;
+    final titleColor = widget.isDark ? AppColors.darkText : AppColors.lightText;
+    final subtitleColor = widget.isDark ? AppColors.darkText2 : AppColors.lightText2;
+    final borderColor = widget.isDark ? AppColors.darkBorder : AppColors.lightBorder;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: _isHovered ? widget.accentColor : borderColor,
+              width: 1.5,
+            ),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: widget.accentColor.withOpacity(0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
+          ),
+          child: Row(
+            children: [
+              // Icon container
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _isHovered 
+                      ? widget.iconColor.withOpacity(0.15) 
+                      : (widget.isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04)),
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: widget.iconColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Text column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: TextStyle(
+                        fontFamily: 'Syne',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      widget.subtitle,
+                      style: TextStyle(
+                        fontFamily: 'Syne',
+                        fontSize: 12,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Chevron / arrow indicator
+              AnimatedSlide(
+                offset: _isHovered ? const Offset(0.15, 0) : Offset.zero,
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: _isHovered ? widget.accentColor : subtitleColor.withOpacity(0.5),
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
